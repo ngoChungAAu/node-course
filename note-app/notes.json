@@ -1,1 +1,5 @@
-[{"title":1,"time":2},{"title":2,"time":3},{"title":3,"time":4}]
+[
+  { "title": 1, "time": 2 },
+  { "title": 2, "time": 3 },
+  { "title": 3, "time": 4 }
+]

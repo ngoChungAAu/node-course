@@ -1,2 +1,6 @@
 note-app/package-lock.json
 note-app/node_modules/
+weather-app/node_modules/
+weather-app/package-lock.json
+web-server/node_modules/
+web-server/package-lock.json

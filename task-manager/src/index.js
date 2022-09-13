@@ -1,4 +1,6 @@
 const express = require("express");
+// .env
+require("dotenv").config();
 // connect to DB
 require("./db/mongoose");
 // router

@@ -9,7 +9,12 @@ taskRouter.post("/tasks", async (req, res) => {
     await task.save();
     res.status(201).send(task);
   } catch (e) {
-    res.status(400).send(e);
+    if (e.errors) {
+      const field = Object.keys(e.errors);
+      return res.status(400).send(e.errors[field].message);
+    }
+
+    res.send(e);
   }
 });
 
@@ -61,7 +66,12 @@ taskRouter.patch("/tasks/:id", async (req, res) => {
 
     res.send(task);
   } catch (e) {
-    res.status(400).send(e);
+    if (e.errors) {
+      const field = Object.keys(e.errors);
+      return res.status(400).send(e.errors[field].message);
+    }
+
+    res.send(e);
   }
 });
 
@@ -75,7 +85,7 @@ taskRouter.delete("/tasks/:id", async (req, res) => {
 
     res.send(task);
   } catch (e) {
-    res.status(500).send();
+    res.status(500).send(e);
   }
 });
 

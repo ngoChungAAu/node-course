@@ -3,6 +3,8 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const jwt_key = process.env.JWT_KEY;
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -40,6 +42,11 @@ const userSchema = new mongoose.Schema({
       }
     },
   },
+  role: {
+    type: String,
+    default: "user",
+    enum: ["user", "admin"],
+  },
   tokens: [
     {
       token: {
@@ -65,26 +72,30 @@ userSchema.statics.findByCredentials = async function (email, password) {
       throw new Error("Incorrect password!");
     }
 
-    return user;
+    return { error: undefined, user };
   } catch (error) {
-    return undefined;
+    return { error, user: undefined };
   }
 };
 
 // define functions to the document
-userSchema.methods.generateAuthToken = async function (key) {
-  const { _id, name, email, age, tokens } = this;
+userSchema.methods.publicData = function () {
+  const { password, tokens, ...data } = this.toObject();
+  return data;
+};
 
-  const token = jwt.sign(
-    { _id: _id.toString(), name, email, age },
-    key.toString()
-  );
+userSchema.methods.generateAuthToken = async function () {
+  try {
+    const token = jwt.sign(this.publicData(), jwt_key);
 
-  this.tokens = tokens.concat({ token });
+    this.tokens = this.tokens.concat({ token });
 
-  await this.save();
+    await this.save();
 
-  return token;
+    return token;
+  } catch (error) {
+    return undefined;
+  }
 };
 
 // hash the password

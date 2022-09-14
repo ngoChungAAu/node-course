@@ -1,10 +1,10 @@
 const express = require("express");
 const User = require("../models/user");
+const auth = require("../middleware/auth");
 const userRouter = new express.Router();
 
-const jwt_private_key = process.env.JWT_PRIVATE_KEY;
-
-userRouter.post("/users", async (req, res) => {
+// register
+userRouter.post("/user/register", async (req, res) => {
   const user = new User(req.body);
 
   try {
@@ -27,29 +27,45 @@ userRouter.post("/users", async (req, res) => {
   }
 });
 
-userRouter.post("/users/login", async (req, res) => {
+// login
+userRouter.post("/user/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findByCredentials(email, password);
+    const { user, error } = await User.findByCredentials(email, password);
 
     if (!user) {
-      return res
-        .status(401)
-        .send({ error: "Login failed! Check authentication credentials" });
+      return res.status(401).send({
+        error: error.message,
+      });
     }
 
-    const access_token = await user.generateAuthToken(jwt_private_key);
+    const access_token = await user.generateAuthToken();
 
-    res.status(201).send({ user, access_token });
+    if (!access_token) {
+      return res.status(401).send({
+        error: "Login failed!",
+      });
+    }
+
+    res.status(201).send({ access_token });
   } catch (err) {
     res.send(err);
   }
 });
 
-userRouter.get("/users", async (req, res) => {
+// get list users
+userRouter.get("/user/list", auth, async (req, res) => {
+  const { role } = req.user;
+
+  if (role === "user") {
+    return res.status(401).send({ error: "Only admin !!!" });
+  }
+
   try {
     const users = await User.find({});
+
+    users.map((e) => e.publicData());
 
     res.send(users);
   } catch (error) {
@@ -57,24 +73,35 @@ userRouter.get("/users", async (req, res) => {
   }
 });
 
-userRouter.get("/users/:id", async (req, res) => {
-  const _id = req.params.id;
+// get user profile
+userRouter.get("/user/profile", auth, async (req, res) => {
+  res.send(req.user.publicData());
+});
+
+// get user detail by id
+userRouter.get("/user/:id", auth, async (req, res) => {
+  const { role } = req.user;
+
+  if (role === "user") {
+    return res.status(401).send({ error: "Only admin !!!" });
+  }
 
   try {
-    const user = await User.findById(_id);
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).send("Not found user!");
     }
 
-    res.send(user);
+    res.send(user.publicData());
   } catch (err) {
     res.status(500).send(err);
   }
 });
 
-userRouter.patch("/users/:id", async (req, res) => {
-  const updateFields = ["name", "email", "password", "age"];
+// update user
+userRouter.patch("/user/update", auth, async (req, res) => {
+  const updateFields = ["name", "age"];
   const fields = Object.keys(req.body);
   const isFields = fields.every((e) => updateFields.includes(e));
 
@@ -83,20 +110,9 @@ userRouter.patch("/users/:id", async (req, res) => {
   }
 
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: { ...req.body } },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    updateFields.forEach((e) => (req.user[e] = req.body[e]));
 
-    if (!user) {
-      return res.status(404).send("Not found user!");
-    }
-
-    res.send(user);
+    res.send(req.user.publicData());
   } catch (err) {
     if (err.errors) {
       const field = Object.keys(err.errors);
@@ -107,7 +123,64 @@ userRouter.patch("/users/:id", async (req, res) => {
   }
 });
 
-userRouter.delete("/users/:id", async (req, res) => {
+// change password
+userRouter.patch("/user/change-password", auth, async (req, res) => {
+  const password = req.body.password;
+
+  try {
+    req.user.password = password;
+
+    await req.user.save();
+
+    res.status(200).send("Change password successfully!");
+  } catch (err) {
+    if (err.errors) {
+      const field = Object.keys(err.errors);
+      return res.status(400).send(err.errors[field].message);
+    }
+
+    res.send(err);
+  }
+});
+
+// update role
+userRouter.patch("/user/update/:id", auth, async (req, res) => {
+  const { role } = req.user;
+
+  if (role === "user") {
+    return res.status(401).send({ error: "Only admin !!!" });
+  }
+
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (user.role === "admin") {
+      user.role = "user";
+    } else {
+      user.role = "admin";
+    }
+
+    await user.save();
+
+    res.send(req.user.publicData());
+  } catch (err) {
+    if (err.errors) {
+      const field = Object.keys(err.errors);
+      return res.status(400).send(err.errors[field].message);
+    }
+
+    res.send(err);
+  }
+});
+
+// delete user by id
+userRouter.delete("/user/:id", auth, async (req, res) => {
+  const { role } = req.user;
+
+  if (role === "user") {
+    return res.status(401).send({ error: "Only admin !!!" });
+  }
+
   try {
     const user = await User.findByIdAndDelete(req.params.id);
 
@@ -115,7 +188,35 @@ userRouter.delete("/users/:id", async (req, res) => {
       return res.status(404).send("Not found user!");
     }
 
-    res.send(user);
+    res.status(200).send("Delete successfully!");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// logout one
+userRouter.post("/user/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token != req.token;
+    });
+
+    await req.user.save();
+
+    res.send("Logout successfully!");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// logout all
+userRouter.post("/user/logout/all", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+
+    await req.user.save();
+
+    res.send("Logout all successfully!");
   } catch (error) {
     res.status(500).send(error);
   }

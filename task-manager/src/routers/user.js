@@ -23,7 +23,7 @@ userRouter.post("/user/register", async (req, res) => {
       return res.status(400).send(err.errors[field].message);
     }
 
-    res.send(err);
+    res.send({ msg: err.message });
   }
 });
 
@@ -50,7 +50,7 @@ userRouter.post("/user/login", async (req, res) => {
 
     res.status(201).send({ access_token });
   } catch (err) {
-    res.send(err);
+    res.send({ msg: err.message });
   }
 });
 
@@ -69,7 +69,7 @@ userRouter.get("/user/list", auth, async (req, res) => {
 
     res.send(users);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ msg: error.message });
   }
 });
 
@@ -95,7 +95,7 @@ userRouter.get("/user/:id", auth, async (req, res) => {
 
     res.send(user.publicData());
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send({ msg: err.message });
   }
 });
 
@@ -110,7 +110,9 @@ userRouter.patch("/user/update", auth, async (req, res) => {
   }
 
   try {
-    updateFields.forEach((e) => (req.user[e] = req.body[e]));
+    fields.forEach((e) => (req.user[e] = req.body[e]));
+
+    await req.user.save();
 
     res.send(req.user.publicData());
   } catch (err) {
@@ -119,7 +121,7 @@ userRouter.patch("/user/update", auth, async (req, res) => {
       return res.status(400).send(err.errors[field].message);
     }
 
-    res.send(err);
+    res.send({ msg: err.message });
   }
 });
 
@@ -139,7 +141,7 @@ userRouter.patch("/user/change-password", auth, async (req, res) => {
       return res.status(400).send(err.errors[field].message);
     }
 
-    res.send(err);
+    res.send({ msg: err.message });
   }
 });
 
@@ -169,7 +171,7 @@ userRouter.patch("/user/update/:id", auth, async (req, res) => {
       return res.status(400).send(err.errors[field].message);
     }
 
-    res.send(err);
+    res.send({ msg: err.message });
   }
 });
 
@@ -190,7 +192,7 @@ userRouter.delete("/user/:id", auth, async (req, res) => {
 
     res.status(200).send("Delete successfully!");
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ msg: error.message });
   }
 });
 
@@ -205,7 +207,7 @@ userRouter.post("/user/logout", auth, async (req, res) => {
 
     res.send("Logout successfully!");
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ msg: error.message });
   }
 });
 
@@ -218,7 +220,7 @@ userRouter.post("/user/logout/all", auth, async (req, res) => {
 
     res.send("Logout all successfully!");
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ msg: error.message });
   }
 });
 

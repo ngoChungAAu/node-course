@@ -2,6 +2,14 @@ const express = require("express");
 const User = require("../models/user");
 const auth = require("../middleware/auth");
 const userRouter = new express.Router();
+const multer = require("multer");
+const { sendEmail } = require("../mail/mail");
+
+userRouter.get("/mail", (req, res) => {
+  sendEmail();
+
+  res.send("Done!");
+});
 
 // register
 userRouter.post("/user/register", async (req, res) => {
@@ -124,6 +132,39 @@ userRouter.patch("/user/update", auth, async (req, res) => {
     res.send({ msg: err.message });
   }
 });
+
+// upload avatar
+const upload = multer({
+  dest: "images",
+  limits: {
+    fileSize: 500000,
+  },
+  fileFilter(req, file, callback) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return callback(new Error("Must be image file"));
+    }
+
+    callback(undefined, true);
+  },
+});
+
+userRouter.post(
+  "/upload-avatar",
+  auth,
+  upload.single("file"),
+  (err, req, res, next) => {
+    if (err) return res.status(400).send({ error: err.message });
+
+    next();
+  },
+  async (req, res) => {
+    req.user.avatar = req.file.buffer;
+
+    await req.user.save();
+
+    res.status(200).send("Update done!");
+  }
+);
 
 // change password
 userRouter.patch("/user/change-password", auth, async (req, res) => {

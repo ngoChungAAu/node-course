@@ -49,6 +49,9 @@ const userSchema = new mongoose.Schema(
       default: "user",
       enum: ["user", "admin"],
     },
+    avatar: {
+      type: Buffer,
+    },
     tokens: [
       {
         token: {

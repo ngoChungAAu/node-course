@@ -6,3 +6,4 @@ web-server/node_modules/
 web-server/package-lock.json
 task-manager/node_modules/
 task-manager/package-lock.json
+task-manager/.env

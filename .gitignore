@@ -7,3 +7,6 @@ web-server/package-lock.json
 task-manager/node_modules/
 task-manager/package-lock.json
 task-manager/.env
+account-service/.env
+account-service/package-lock.json
+account-service/node_modules/

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const { toJSON } = require("./plugins");
+const { toJSON } = require("./plugins/toJSON.plugin");
 
 const schema = new mongoose.Schema(
   {
@@ -15,11 +15,23 @@ const schema = new mongoose.Schema(
       trim: true,
       require: true,
       validate(value) {
-        const regex =
-          /(?=.*?[0-9])(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[#?!@$%^&*-])[A-Za-z\d@$!%*?&]{8,255}/;
+        if (value.length < 8) {
+          throw Error("Password must be minimum 8 characters");
+        }
 
-        if (!value.match(regex)) {
-          throw Error("Invalid password!");
+        if (value.length > 255) {
+          throw Error("Password must be maximum 255 characters");
+        }
+
+        if (
+          !value.match(/(?=.*?[0-9])/) ||
+          !value.match(/(?=.*?[A-Z])/) ||
+          !value.match(/(?=.*?[a-z])/) ||
+          !value.match(/(?=.*?[#?!@$%^&*-])/)
+        ) {
+          throw Error(
+            "Password must contain at least 1 letter and 1 number and 1 special character"
+          );
         }
       },
       private: true,
@@ -62,9 +74,13 @@ const schema = new mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-schema.plugin(toJSON);
+// schema.plugin(toJSON);
 
 // check if email is taken
+/**
+ * @param  {string} email
+ * @param  {ObjectId} excludeUserId: except this user id
+ */
 schema.statics.isEmailTaken = async function (email, excludeUserId) {
   const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
   return !!user;

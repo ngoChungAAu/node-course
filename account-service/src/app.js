@@ -1,20 +1,13 @@
 const express = require("express");
 const httpStatus = require("http-status");
-const config = require("./config/config");
-const { authLimiter } = require("./middlewares/rateLimiter");
+const ApiError = require("./utils/ApiError");
 const routes = require("./routes");
 const { errorConverter, errorHandler } = require("./middlewares/error");
-const ApiError = require("./utils/ApiError");
 
 const app = express();
 
 // parse json request body
 app.use(express.json());
-
-// limit repeated failed requests to auth endpoints
-if (config.env === "production") {
-  app.use("/auth", authLimiter);
-}
 
 // routes
 app.use(routes);

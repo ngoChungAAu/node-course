@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const logger = require("../config/logger");
 const config = require("../config/config");
+const logger = require("../config/logger");
 const { User } = require("../models");
 
 (async () => {
@@ -13,10 +13,12 @@ const { User } = require("../models");
 
     if (count === 0) {
       const admin = new User({
-        name: "admin",
         email: "admin@au.com",
         password: "Admin1234!",
+        name: "admin",
+        address: "",
         role: "admin",
+        isActive: true,
       });
 
       await admin.save();

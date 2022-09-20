@@ -37,7 +37,7 @@ const { value: envVars, error } = envVarsSchema
   .validate(process.env);
 
 if (error) {
-  throw new Error(`Config validation error: ${error.message}`);
+  throw new Error(`Config env error: ${error.details[0].message}`);
 }
 
 module.exports = {

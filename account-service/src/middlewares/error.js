@@ -4,6 +4,7 @@ const config = require("../config/config");
 const logger = require("../config/logger");
 const ApiError = require("../utils/ApiError");
 
+// if error is not an instanceOf APIError, convert it.
 const errorConverter = (err, req, res, next) => {
   let error = err;
   if (!(error instanceof ApiError)) {
@@ -17,7 +18,7 @@ const errorConverter = (err, req, res, next) => {
   next(error);
 };
 
-// eslint-disable-next-line no-unused-vars
+// error handler, send stacktrace only during development
 const errorHandler = (err, req, res, next) => {
   let { statusCode, message } = err;
   if (config.env === "prod" && !err.isOperational) {
@@ -30,7 +31,6 @@ const errorHandler = (err, req, res, next) => {
   const response = {
     code: statusCode,
     message,
-    ...(config.env === "dev" && { stack: err.stack }),
   };
 
   if (config.env === "dev") {

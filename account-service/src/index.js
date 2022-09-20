@@ -1,5 +1,5 @@
-require("./database/mongoose");
 const app = require("./app");
+require("./database/mongoose");
 const config = require("./config/config");
 
 app.listen(config.port, () => {

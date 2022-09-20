@@ -4,36 +4,46 @@
  *  - replaces _id with id
  */
 
-const deleteAtPath = (obj, path, index) => {
-  if (index === path.length - 1) {
-    delete obj[path[index]];
-    return;
-  }
-  deleteAtPath(obj[path[index]], path, index + 1);
-};
-
 const toJSON = (schema) => {
   let transform;
   if (schema.options.toJSON && schema.options.toJSON.transform) {
     transform = schema.options.toJSON.transform;
   }
 
+  //Extend toJSON options
   schema.options.toJSON = Object.assign(schema.options.toJSON || {}, {
     transform(doc, ret, options) {
-      Object.keys(schema.paths).forEach((path) => {
+      // remove private path
+      for (const path in schema.paths) {
         if (schema.paths[path].options && schema.paths[path].options.private) {
-          deleteAtPath(ret, path.split("."), 0);
+          if (typeof ret[path] !== "undefined") {
+            delete ret[path];
+          }
         }
-      });
+      }
 
-      ret.id = ret._id.toString();
-      delete ret._id;
-      delete ret.__v;
-      delete ret.createdAt;
-      delete ret.updatedAt;
+      //Remove version
+      if (typeof ret.__v !== "undefined") {
+        delete ret.__v;
+      }
+
+      //Normalize ID
+      if (ret._id && typeof ret._id === "object" && ret._id.toString) {
+        if (typeof ret.id === "undefined") {
+          ret.id = ret._id.toString();
+        }
+      }
+
+      if (typeof ret._id !== "undefined") {
+        delete ret._id;
+      }
+
+      //Call custom transform if present
       if (transform) {
         return transform(doc, ret, options);
       }
+
+      return ret;
     },
   });
 };

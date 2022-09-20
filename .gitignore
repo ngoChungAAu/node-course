@@ -10,3 +10,5 @@ task-manager/.env
 account-service/.env
 account-service/package-lock.json
 account-service/node_modules/
+user-service/package-lock.json
+user-service/node_modules/

@@ -27,7 +27,25 @@ const password = (value, helpers) => {
   return value;
 };
 
+const positiveNumber = (value, helpers) => {
+  if (value < 0) {
+    return helpers.message("Must be a positive number!");
+  }
+
+  return value;
+};
+
+const integerNumber = (value, helpers) => {
+  if (!!(value % 1)) {
+    return helpers.message("Must be an integer number!");
+  }
+
+  return value;
+};
+
 module.exports = {
   objectId,
   password,
+  positiveNumber,
+  integerNumber,
 };

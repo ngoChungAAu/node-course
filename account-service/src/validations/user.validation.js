@@ -1,58 +1,44 @@
 const Joi = require("joi");
-const { password, objectId } = require("./common.validation");
+const {
+  password,
+  objectId,
+  positiveNumber,
+  integerNumber,
+} = require("./common.validation");
 
-const createUser = {
+const register = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
-    avatar: Joi.any(),
     name: Joi.string().required(),
-    age: Joi.number().default(0),
-    address: Joi.string(),
-    role: Joi.string().default("user").valid("user", "admin"),
-    isActive: Joi.boolean().default(false),
   }),
 };
 
-const getUsers = {
-  query: Joi.object().keys({
+const login = {
+  body: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  }),
+};
+
+const updateProfile = {
+  body: Joi.object().keys({
     name: Joi.string(),
-    role: Joi.string(),
-    sortBy: Joi.string(),
-    limit: Joi.number().integer(),
-    page: Joi.number().integer(),
+    age: Joi.number().custom(positiveNumber).custom(integerNumber),
+    name: Joi.string(),
   }),
 };
 
-const getUser = {
-  params: Joi.object().keys({
-    userId: Joi.string().custom(objectId),
-  }),
-};
-
-const updateUser = {
-  params: Joi.object().keys({
-    userId: Joi.required().custom(objectId),
-  }),
-  body: Joi.object()
-    .keys({
-      email: Joi.string().email(),
-      password: Joi.string().custom(password),
-      name: Joi.string(),
-    })
-    .min(1),
-};
-
-const deleteUser = {
-  params: Joi.object().keys({
-    userId: Joi.string().custom(objectId),
+const changePassword = {
+  body: Joi.object().keys({
+    currentPassword: Joi.string().required(),
+    newPassword: Joi.string().required().custom(password),
   }),
 };
 
 module.exports = {
-  createUser,
-  getUsers,
-  getUser,
-  updateUser,
-  deleteUser,
+  register,
+  login,
+  updateProfile,
+  changePassword,
 };

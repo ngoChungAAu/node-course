@@ -9,7 +9,7 @@ const validate = (schema) => (req, res, next) => {
   const object = pick(req, Object.keys(validSchema));
 
   const { value, error } = Joi.compile(validSchema)
-    .prefs({ errors: { label: "key" }, abortEarly: false })
+    .prefs({ errors: { label: "key" } })
     .validate(object);
 
   if (error) {

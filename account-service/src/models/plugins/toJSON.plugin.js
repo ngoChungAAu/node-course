@@ -10,7 +10,7 @@ const toJSON = (schema) => {
     transform = schema.options.toJSON.transform;
   }
 
-  //Extend toJSON options
+  // Extend toJSON options
   schema.options.toJSON = Object.assign(schema.options.toJSON || {}, {
     transform(doc, ret, options) {
       // remove private path
@@ -22,12 +22,21 @@ const toJSON = (schema) => {
         }
       }
 
-      //Remove version
+      // Remove version
       if (typeof ret.__v !== "undefined") {
         delete ret.__v;
       }
 
-      //Normalize ID
+      // Remove time
+      if (typeof ret.createdAt !== "undefined") {
+        delete ret.createdAt;
+      }
+
+      if (typeof ret.updatedAt !== "undefined") {
+        delete ret.updatedAt;
+      }
+
+      // Normalize ID
       if (ret._id && typeof ret._id === "object" && ret._id.toString) {
         if (typeof ret.id === "undefined") {
           ret.id = ret._id.toString();
@@ -38,7 +47,7 @@ const toJSON = (schema) => {
         delete ret._id;
       }
 
-      //Call custom transform if present
+      // Call custom transform if present
       if (transform) {
         return transform(doc, ret, options);
       }

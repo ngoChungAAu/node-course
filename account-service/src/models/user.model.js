@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const { toJSON } = require("./plugins/toJSON.plugin");
+const { toJSON } = require("./plugins");
+const { roleTypes } = require("../types/roles");
 
 const schema = new mongoose.Schema(
   {
@@ -37,7 +38,8 @@ const schema = new mongoose.Schema(
       private: true,
     },
     avatar: {
-      type: Buffer,
+      type: String,
+      default: "",
     },
     name: {
       type: String,
@@ -59,11 +61,12 @@ const schema = new mongoose.Schema(
     },
     address: {
       type: String,
+      default: "",
     },
     role: {
       type: String,
       default: "user",
-      enum: ["user", "admin"],
+      enum: roleTypes,
     },
     isActive: {
       type: Boolean,
@@ -74,7 +77,7 @@ const schema = new mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-// schema.plugin(toJSON);
+schema.plugin(toJSON);
 
 // check if email is taken
 /**

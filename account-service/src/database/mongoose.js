@@ -16,7 +16,6 @@ const { User } = require("../models");
         email: "admin@au.com",
         password: "Admin1234!",
         name: "admin",
-        address: "",
         role: "admin",
         isActive: true,
       });

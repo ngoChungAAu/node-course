@@ -36,9 +36,27 @@ const changePassword = {
   }),
 };
 
+const getList = {
+  query: Joi.object().keys({
+    name: Joi.string(),
+    role: Joi.string(),
+    createdAt: Joi.string().valid("asc", "desc"),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
+};
+
+const userId = {
+  params: Joi.object().keys({
+    id: Joi.required().custom(objectId),
+  }),
+};
+
 module.exports = {
   register,
   login,
   updateProfile,
   changePassword,
+  getList,
+  userId,
 };

@@ -7,37 +7,70 @@ const { userValidation } = require("../validations");
 const router = express.Router();
 
 // register
-router
-  .route("/register")
-  .post(validate(userValidation.register), userController.register);
+router.post(
+  "/register",
+  validate(userValidation.register),
+  userController.register
+);
 
 // login
-router
-  .route("/login")
-  .post(validate(userValidation.login), userController.login);
+router.post("/login", validate(userValidation.login), userController.login);
 
 // get profile
-router.route("/profile").get(auth, userController.getProfile);
+router.get("/profile", auth, userController.getProfile);
 
 // update profile
-router
-  .route("/update-profile")
-  .patch(
-    validate(userValidation.updateProfile),
-    auth,
-    userController.updateProfile
-  );
+router.patch(
+  "/update-profile",
+  validate(userValidation.updateProfile),
+  auth,
+  userController.updateProfile
+);
 
 // change password
-router
-  .route("/change-password")
-  .patch(
-    validate(userValidation.changePassword),
-    auth,
-    userController.changePassword
-  );
+router.patch(
+  "/change-password",
+  validate(userValidation.changePassword),
+  auth,
+  userController.changePassword
+);
+
+// logout on your device
+router.post("/logout/me", auth, userController.logoutMe);
+
+// logout all the devices
+router.post("/logout/all", auth, userController.logoutAll);
 
 // list user
-router.route("/list").get(auth("list-user"), userController.getList);
+router.get(
+  "/list",
+  validate(userValidation.getList),
+  auth("list-user"),
+  userController.getList
+);
+
+// get user by id
+router.get(
+  "/:id",
+  validate(userValidation.userId),
+  auth("user-detail"),
+  userController.getDetail
+);
+
+// update role user
+router.patch(
+  "/:id",
+  validate(userValidation.userId),
+  auth("update-role"),
+  userController.updateRole
+);
+
+// delete user
+router.delete(
+  "/:id",
+  validate(userValidation.userId),
+  auth("delete-user"),
+  userController.deleteUser
+);
 
 module.exports = router;

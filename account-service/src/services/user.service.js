@@ -1,14 +1,6 @@
 const httpStatus = require("http-status");
-const { User } = require("../models");
+const { User, Token } = require("../models");
 const ApiError = require("../utils/ApiError");
-
-const getUserById = async (id) => {
-  return User.findById(id);
-};
-
-const getUserByEmail = async (email) => {
-  return User.findOne({ email });
-};
 
 const register = async (user) => {
   const isTaken = await User.isEmailTaken(user.email);
@@ -21,7 +13,7 @@ const register = async (user) => {
 };
 
 const login = async (email, password) => {
-  const user = await getUserByEmail(email);
+  const user = await User.findOne({ email });
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
   }
@@ -48,11 +40,89 @@ const changePassword = async (user, body) => {
   await user.save();
 };
 
+const logoutMe = async (token) => {
+  await token.remove();
+};
+
+const logoutAll = async (id) => {
+  await Token.deleteMany({ user: id });
+};
+
+const getList = async (filter, options) => {
+  const { page: qPage, limit: qLimit, ...qSort } = options;
+
+  const sort = {
+    createdAt: 1,
+  };
+
+  if (qSort.createdAt) {
+    sort.createdAt = qSort.createdAt === "asc" ? 1 : -1;
+  }
+
+  const limit = qLimit && parseInt(qLimit) > 0 ? parseInt(qLimit) : 3;
+
+  const page = qPage && parseInt(qPage) > 0 ? parseInt(qPage) : 1;
+
+  const skip = (page - 1) * limit;
+
+  const totalDocs = await User.countDocuments(filter);
+  const users = await User.find(filter).skip(skip).limit(limit).sort(sort);
+
+  if (totalDocs === 0) {
+    throw new ApiError(httpStatus.NO_CONTENT, "No content");
+  }
+
+  return {
+    data: users,
+    totalItem: totalDocs,
+    totalPage: Math.ceil(totalDocs / limit),
+    currentPage: page,
+  };
+};
+
+const getDetail = async (id) => {
+  const user = await User.findById({ _id: id });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  return user;
+};
+
+const updateRole = async (id) => {
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+  }
+
+  if (user.role === "admin") {
+    user.role = "user";
+  } else {
+    user.role = "admin";
+  }
+
+  await user.save();
+};
+
+const deleteUser = async (id) => {
+  const user = await User.findByIdAndDelete(id);
+
+  if (!user) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+  }
+};
+
 module.exports = {
-  getUserById,
-  getUserByEmail,
   register,
   login,
   updateProfile,
   changePassword,
+  logoutMe,
+  logoutAll,
+  getList,
+  getDetail,
+  updateRole,
+  deleteUser,
 };

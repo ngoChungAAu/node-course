@@ -2,14 +2,25 @@ const httpStatus = require("http-status");
 const { User, Token } = require("../models");
 const ApiError = require("../utils/ApiError");
 
-const register = async (user) => {
-  const isTaken = await User.isEmailTaken(user.email);
+const register = async (userBody) => {
+  const isTaken = await User.isEmailTaken(userBody.email);
 
   if (isTaken) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
 
-  return User.create(user);
+  const user = await User.findOne({ email: userBody.email, isActive: false });
+
+  if (user) {
+    user.name = userBody.name;
+    user.password = userBody.password;
+
+    await user.save();
+
+    return user;
+  } else {
+    await User.create(userBody);
+  }
 };
 
 const login = async (email, password) => {
@@ -114,6 +125,41 @@ const deleteUser = async (id) => {
   }
 };
 
+const activeAccount = async (token) => {
+  const tokenDoc = await Token.findOne({
+    activeToken: token,
+  });
+
+  if (!tokenDoc) {
+    return next(
+      new ApiError(httpStatus.UNAUTHORIZED, "Token not found. Please register!")
+    );
+  }
+
+  jwt.verify(token, config.jwt.secret, async (err, res) => {
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        await tokenDoc.remove();
+      }
+
+      return next(
+        new ApiError(
+          httpStatus.UNAUTHORIZED,
+          "Token is expired!. Please register again!"
+        )
+      );
+    }
+  });
+
+  const { user } = await tokenDoc.populate("user");
+
+  user.isActive = true;
+
+  await user.save();
+
+  await tokenDoc.remove();
+};
+
 module.exports = {
   register,
   login,
@@ -125,4 +171,5 @@ module.exports = {
   getDetail,
   updateRole,
   deleteUser,
+  activeAccount,
 };

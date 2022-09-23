@@ -123,7 +123,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // delete tasks when delete user
-userSchema.pre("save", async function (next) {
+userSchema.pre("remove", async function (next) {
   const user = this;
 
   Task.deleteMany({ userID: user._id });

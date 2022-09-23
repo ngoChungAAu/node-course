@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const { toJSON } = require("./plugins");
 const { roleTypes } = require("../types/roles");
+const Token = require("./token.model");
 
 const schema = new mongoose.Schema(
   {
@@ -80,12 +81,8 @@ const schema = new mongoose.Schema(
 schema.plugin(toJSON);
 
 // check if email is taken
-/**
- * @param  {string} email
- * @param  {ObjectId} excludeUserId: except this user id
- */
-schema.statics.isEmailTaken = async function (email, excludeUserId) {
-  const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
+schema.statics.isEmailTaken = async function (email) {
+  const user = await this.findOne({ email, isActive: true });
   return !!user;
 };
 
@@ -101,6 +98,15 @@ schema.pre("save", async function (next) {
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
   }
+  next();
+});
+
+// Remove all token when delete user
+schema.pre("remove", async function (next) {
+  const user = this;
+
+  Token.deleteMany({ user: user._id });
+
   next();
 });
 

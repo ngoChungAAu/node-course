@@ -33,7 +33,7 @@ const auth = (requiredRight) => async (req, res, next) => {
     const { user } = await tokenDoc.populate("user");
 
     if (!user) {
-      await Token.deleteMany({ user: res.userId });
+      await Token.deleteMany({ user: tokenDoc.user });
 
       return next(
         new ApiError(httpStatus.UNAUTHORIZED, "User not found. Please register")

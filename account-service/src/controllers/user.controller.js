@@ -1,10 +1,15 @@
 const httpStatus = require("http-status");
-const { userService, tokenService } = require("../services");
+const { userService, tokenService, mailService } = require("../services");
 const catchAsync = require("../utils/catchAsync");
 const pick = require("../utils/pick");
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.register(req.body);
+
+  const token = await tokenService.generateActiveAccountToken(user._id);
+
+  mailService.sendActiveAccountEmail("to-example@email.com", token);
+
   res.status(httpStatus.CREATED).send(user);
 });
 
@@ -61,6 +66,11 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send("Delete user successfully!");
 });
 
+const activeAccount = catchAsync(async (req, res) => {
+  await userService.activeAccount(req.query.token);
+  res.status(httpStatus.OK).send("Active account successfully!");
+});
+
 module.exports = {
   register,
   login,
@@ -73,4 +83,5 @@ module.exports = {
   getDetail,
   updateRole,
   deleteUser,
+  activeAccount,
 };

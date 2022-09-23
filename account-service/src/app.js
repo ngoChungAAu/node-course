@@ -3,8 +3,15 @@ const httpStatus = require("http-status");
 const ApiError = require("./utils/ApiError");
 const routes = require("./routes");
 const { errorConverter, errorHandler } = require("./middlewares/error");
+const {
+  successRequestHandler,
+  errorRequestHandler,
+} = require("./config/morgan");
 
 const app = express();
+
+app.use(successRequestHandler);
+app.use(errorRequestHandler);
 
 // parse json request body
 app.use(express.json());

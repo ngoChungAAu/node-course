@@ -73,4 +73,7 @@ router.delete(
   userController.deleteUser
 );
 
+// active account
+router.post("active-account", userController.activeAccount);
+
 module.exports = router;

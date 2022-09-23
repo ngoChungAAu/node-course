@@ -1,8 +1,6 @@
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
-const httpStatus = require("http-status");
 const config = require("../config/config");
-const userService = require("./user.service");
 const { Token } = require("../models");
 const { tokenTypes } = require("../types/tokens");
 
@@ -54,8 +52,30 @@ const generateAuthTokens = async (user) => {
   return { accessToken, refreshToken };
 };
 
+const generateActiveAccountToken = async (userId) => {
+  const expires = moment().add(config.jwt.activeExpirationMinutes, "minutes");
+  const activeAccountToken = generateToken(userId, expires, tokenTypes.ACTIVE);
+
+  const tokenDoc = await Token.findOne({ user: userId, accessToken: "###" });
+
+  if (tokenDoc) {
+    tokenDoc.activeToken = activeAccountToken;
+
+    tokenDoc.save();
+  } else {
+    await saveToken(userId, {
+      accessToken: "###",
+      refreshToken: "###",
+      activeToken: activeAccountToken,
+    });
+  }
+
+  return activeAccountToken;
+};
+
 module.exports = {
   generateToken,
   saveToken,
   generateAuthTokens,
+  generateActiveAccountToken,
 };

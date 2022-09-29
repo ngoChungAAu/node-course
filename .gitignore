@@ -12,3 +12,5 @@ account-service/package-lock.json
 account-service/node_modules/
 user-service/package-lock.json
 user-service/node_modules/
+fastify-account-service/package-lock.json
+fastify-account-service/node_modules/

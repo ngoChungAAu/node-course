@@ -1,6 +1,6 @@
 const { userController } = require("../controllers");
 
-module.exports = (fastify, opts, done) => {
+module.exports = async (fastify, opts) => {
   fastify.post("/register", {}, userController.register);
 
   // login
@@ -35,6 +35,4 @@ module.exports = (fastify, opts, done) => {
 
   // active account
   fastify.post("/active-account", userController.activeAccount);
-
-  done();
 };

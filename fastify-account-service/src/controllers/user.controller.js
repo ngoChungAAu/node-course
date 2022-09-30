@@ -1,5 +1,9 @@
+const { userService } = require("../services");
+
 const register = async (req, rep) => {
-  rep.code(200).send("register");
+  const user = await userService.register(req.body);
+
+  rep.status(201).send(user);
 };
 
 const login = async (req, rep) => {

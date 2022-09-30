@@ -21,9 +21,10 @@ const register = async (userBody) => {
 
     return user;
   } else {
-    await User.create(userBody);
+    return User.create(userBody);
   }
 };
+
 const login = async (email, password) => {
   const user = await User.findOne({ email });
   if (!user || !(await user.isPasswordMatch(password))) {

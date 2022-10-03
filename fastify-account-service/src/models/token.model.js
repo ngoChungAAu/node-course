@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const toJSON = require("../utils/toJSON");
+
 const schema = mongoose.Schema(
   {
     accessToken: {

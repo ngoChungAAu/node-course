@@ -1,53 +1,79 @@
-const { userService } = require("../services");
+const httpStatus = require("http-status");
+const { userService, tokenService } = require("../services");
+const pick = require("../utils/pick");
 
 const register = async (req, rep) => {
-  const user = await userService.register(req.body);
+  try {
+    const user = await userService.register(req.body);
 
-  rep.status(201).send(user);
+    await tokenService.generateActiveAccountToken(user._id);
+
+    rep.code(httpStatus.CREATED).send(user);
+  } catch (error) {
+    rep.code(httpStatus.SERVICE_UNAVAILABLE).send(error);
+  }
 };
 
 const login = async (req, rep) => {
-  rep.code(200).send("login");
+  try {
+    const { email, password } = req.body;
+    const user = await userService.login(email, password);
+    const tokenObj = await tokenService.generateAuthTokens(user);
+    rep.code(httpStatus.CREATED).send(tokenObj);
+  } catch (error) {
+    rep.code(httpStatus.SERVICE_UNAVAILABLE).send(error);
+  }
 };
 
 const getProfile = async (req, rep) => {
-  rep.code(200).send("get profile");
+  rep.status(httpStatus.OK).send(req.user);
 };
 
 const updateProfile = async (req, rep) => {
-  rep.code(200).send("update profile");
+  const user = await userService.updateProfile(req.user, req.body);
+  rep.status(httpStatus.OK).send(user);
 };
 
 const changePassword = async (req, rep) => {
-  rep.code(200).send("change password");
+  await userService.changePassword(req.user, req.body);
+  rep.status(httpStatus.OK).send("Change password successfully!");
 };
 
 const logoutMe = async (req, rep) => {
-  rep.code(200).send("logout me");
+  await userService.logoutMe(req.token);
+  rep.code(httpStatus.OK).send("Logout successfully!");
 };
 
 const logoutAll = async (req, rep) => {
-  rep.code(200).send("logout all");
+  await userService.logoutAll(req.user.id);
+  rep.code(httpStatus.OK).send("Logout all device successfully!");
 };
 
 const getList = async (req, rep) => {
-  rep.code(200).send("get list");
+  const filter = pick(req.query, ["name", "role"]);
+  const options = pick(req.query, ["createdAt", "limit", "page"]);
+  const data = await userService.getList(filter, options);
+  rep.code(httpStatus.OK).send(data);
 };
 
 const getDetail = async (req, rep) => {
-  rep.code(200).send("get detail ");
+  const user = await userService.getDetail(req.params.id);
+  rep.code(httpStatus.OK).send(user);
 };
 
 const updateRole = async (req, rep) => {
-  rep.code(200).send("update role");
+  await userService.updateRole(req.params.id);
+  rep.code(httpStatus.OK).send("Update role successfully!");
 };
 
 const deleteUser = async (req, rep) => {
-  rep.code(200).send("delete user");
+  await userService.deleteUser(req.params.id);
+  rep.code(httpStatus.OK).send("Delete user successfully!");
 };
 
 const activeAccount = async (req, rep) => {
-  rep.code(200).send("active account");
+  await userService.activeAccount(req.query.token);
+  rep.code(httpStatus.OK).send("Active account successfully!");
 };
 
 module.exports = {

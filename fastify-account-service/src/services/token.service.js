@@ -1,17 +1,18 @@
-const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const { Token } = require("../models");
 const { tokenTypes } = require("../types/tokens");
-
 // Generate token
 const generateToken = (userId, expires, type) => {
+  const fastify = require("../index");
+
   const payload = {
     userId,
     iat: moment().unix(),
     exp: expires.unix(),
     type,
   };
-  return jwt.sign(payload, process.env.JWT_SECRET);
+
+  return fastify.jwt.sign(payload);
 };
 
 // Save a token

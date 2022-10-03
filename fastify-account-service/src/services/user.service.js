@@ -1,14 +1,12 @@
 const httpStatus = require("http-status");
 const User = require("../models/user.model");
+const ApiError = require("../utils/ApiError");
 
 const register = async (userBody) => {
   const isTaken = await User.isEmailTaken(userBody.email);
 
   if (isTaken) {
-    throw new Error({
-      statusCode: httpStatus.BAD_REQUEST,
-      message: "Email already taken",
-    });
+    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
 
   const user = await User.findOne({ email: userBody.email, isActive: false });
@@ -27,12 +25,11 @@ const register = async (userBody) => {
 
 const login = async (email, password) => {
   const user = await User.findOne({ email });
+
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new Error({
-      statusCode: httpStatus.UNAUTHORIZED,
-      message: "Incorrect email or password",
-    });
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
   }
+
   return user;
 };
 
@@ -48,10 +45,7 @@ const updateProfile = async (user, body) => {
 
 const changePassword = async (user, body) => {
   if (!(await user.isPasswordMatch(body.currentPassword))) {
-    throw new Error({
-      statusCode: httpStatus.BAD_REQUEST,
-      message: "Incorrect current password",
-    });
+    throw new ApiError(httpStatus.BAD_REQUEST, "Incorrect current password");
   }
 
   user.password = body.newPassword;
@@ -88,10 +82,7 @@ const getList = async (filter, options) => {
   const users = await User.find(filter).skip(skip).limit(limit).sort(sort);
 
   if (totalDocs === 0) {
-    throw new Error({
-      statusCode: httpStatus.NO_CONTENT,
-      message: "No content",
-    });
+    throw new ApiError(httpStatus.NO_CONTENT, "No content");
   }
 
   return {
@@ -106,10 +97,7 @@ const getDetail = async (id) => {
   const user = await User.findById({ _id: id });
 
   if (!user) {
-    throw new Error({
-      statusCode: httpStatus.NOT_FOUND,
-      message: "User not found",
-    });
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
   return user;
@@ -119,10 +107,7 @@ const updateRole = async (id) => {
   const user = await User.findById(id);
 
   if (!user) {
-    throw new Error({
-      statusCode: httpStatus.BAD_REQUEST,
-      message: "User not found",
-    });
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
   if (user.role === "admin") {
@@ -138,10 +123,7 @@ const deleteUser = async (id) => {
   const user = await User.findByIdAndDelete(id);
 
   if (!user) {
-    throw new Error({
-      statusCode: httpStatus.BAD_REQUEST,
-      message: "User not found",
-    });
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 };
 
@@ -152,10 +134,7 @@ const activeAccount = async (token) => {
 
   if (!tokenDoc) {
     return next(
-      new Error({
-        statusCode: httpStatus.UNAUTHORIZED,
-        message: "Token not found. Please register!",
-      })
+      new ApiError(httpStatus.UNAUTHORIZED, "Token not found. Please register!")
     );
   }
 
@@ -166,10 +145,10 @@ const activeAccount = async (token) => {
       }
 
       return next(
-        new Error({
-          statusCode: httpStatus.UNAUTHORIZED,
-          message: "Token is expired!. Please register again!",
-        })
+        new ApiError(
+          httpStatus.UNAUTHORIZED,
+          "Token is expired!. Please register again!"
+        )
       );
     }
   });

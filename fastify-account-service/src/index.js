@@ -6,7 +6,18 @@ require("dotenv").config();
 
 fastify.register(require("./databases/mongoose"));
 
-fastify.register(require("./routes/user.route"), { prefix: "/user" });
+fastify.register(require("@fastify/jwt"), {
+  secret: process.env.JWT_SECRET,
+});
+
+fastify.register(autoLoad, {
+  dir: path.join(__dirname, "plugins"),
+});
+
+fastify.register(autoLoad, {
+  dir: path.join(__dirname, "routes"),
+  options: Object.assign({ prefix: "/api" }),
+});
 
 fastify.listen({ port: process.env.PORT }, function (err, address) {
   if (err) {
@@ -16,3 +27,5 @@ fastify.listen({ port: process.env.PORT }, function (err, address) {
 
   console.log(`Server is now listening on ${address}`);
 });
+
+module.exports = fastify;

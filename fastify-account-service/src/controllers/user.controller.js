@@ -68,6 +68,14 @@ const activeAccount = async (req, rep) => {
   rep.code(httpStatus.OK).send("Active account successfully!");
 };
 
+const uploadAvatar = async (req, rep) => {
+  req.user.avatar = req.file.buffer;
+
+  await req.user.save();
+
+  rep.code(httpStatus.OK).send("Upload avatar success!");
+};
+
 module.exports = {
   register,
   login,
@@ -81,4 +89,5 @@ module.exports = {
   updateRole,
   deleteUser,
   activeAccount,
+  uploadAvatar,
 };

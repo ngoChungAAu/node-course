@@ -1,4 +1,5 @@
 const { userController } = require("../controllers");
+const upload = require("../utils/upload");
 const { userValidation } = require("../validations");
 
 module.exports = async (fastify, opts) => {
@@ -11,7 +12,13 @@ module.exports = async (fastify, opts) => {
   );
 
   // login
-  fastify.post("/login", {}, userController.login);
+  fastify.post(
+    "/login",
+    {
+      schema: userValidation.login,
+    },
+    userController.login
+  );
 
   // get profile
   fastify.get(
@@ -78,6 +85,16 @@ module.exports = async (fastify, opts) => {
 
   // active account
   fastify.post("/active-account", userController.activeAccount);
+
+  // upload avatar
+  fastify.post(
+    "/upload-avatar",
+    {
+      onRequest: fastify.auth(),
+      preHandler: upload.single("file"),
+    },
+    userController.uploadAvatar
+  );
 };
 
 module.exports.autoPrefix = "/user";

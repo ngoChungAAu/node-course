@@ -15,6 +15,11 @@ fastify.register(autoLoad, {
   dir: path.join(__dirname, "plugins"),
 });
 
+// Set the schema validator compiler for all routes
+fastify.setValidatorCompiler(function ({ schema, method, url, httpPart }) {
+  return (data) => schema.validate(data);
+});
+
 // load all route
 fastify.register(autoLoad, {
   dir: path.join(__dirname, "routes"),
@@ -26,17 +31,15 @@ fastify.setNotFoundHandler((request, reply) => {
   throw new ApiError(httpStatus.NOT_FOUND, "Not found");
 });
 
-// handle validation
-fastify.setValidatorCompiler(function ({ schema, method, url, httpPart }) {
-  return (data) => schema.validate(data);
-});
-
-//
+// handle error
 fastify.setErrorHandler(errorHandler);
 
-fastify.listen({ port: process.env.PORT }, function (err, address) {
-  if (err) {
-    console.log(err.message);
-    process.exit(1);
+fastify.listen(
+  { port: process.env.PORT, host: "127.0.0.1" },
+  function (err, address) {
+    if (err) {
+      console.log(err.message);
+      process.exit(1);
+    }
   }
-});
+);

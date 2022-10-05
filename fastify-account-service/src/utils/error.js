@@ -25,7 +25,7 @@ module.exports.errorHandler = (error, request, reply) => {
   };
 
   if (process.env.NODE_ENV === "dev") {
-    // console.error(error);
+    console.error(error);
   }
 
   reply.code(statusCode).send(response);

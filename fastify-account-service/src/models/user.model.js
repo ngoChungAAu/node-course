@@ -36,7 +36,7 @@ const schema = mongoose.Schema(
       },
       private: true,
     },
-    avatar: { type: String, default: "" },
+    avatar: { type: Buffer },
     name: { type: String, require: true },
     age: {
       type: Number,

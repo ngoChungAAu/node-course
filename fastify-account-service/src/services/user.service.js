@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const User = require("../models/user.model");
 const ApiError = require("../utils/ApiError");
+const fs = require("fs");
 
 const register = async (userBody) => {
   const isTaken = await User.isEmailTaken(userBody.email);

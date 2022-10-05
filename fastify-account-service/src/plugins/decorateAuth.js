@@ -1,5 +1,6 @@
 const fp = require("fastify-plugin");
 const httpStatus = require("http-status");
+const jwt = require("jsonwebtoken");
 const { Token } = require("../models");
 const { roleRights } = require("../types/roles");
 const ApiError = require("../utils/ApiError");
@@ -12,7 +13,11 @@ module.exports = fp((fastify, opts, done) => {
       accessToken: token,
     });
 
-    fastify.jwt.verify(token, async (err, res) => {
+    if (!tokenDoc) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Token is not exist!");
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
           await tokenDoc.remove();
@@ -22,8 +27,6 @@ module.exports = fp((fastify, opts, done) => {
             "Token is expired!. Please login again!"
           );
         }
-
-        throw new ApiError(httpStatus.UNAUTHORIZED, "Token is not exist!");
       }
     });
 

@@ -1,7 +1,14 @@
 const { userController } = require("../controllers");
+const { userValidation } = require("../validations");
 
 module.exports = async (fastify, opts) => {
-  fastify.post("/register", {}, userController.register);
+  fastify.post(
+    "/register",
+    {
+      schema: userValidation.register,
+    },
+    userController.register
+  );
 
   // login
   fastify.post("/login", {}, userController.login);

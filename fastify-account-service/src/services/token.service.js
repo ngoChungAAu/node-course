@@ -1,10 +1,10 @@
 const moment = require("moment");
+const jwt = require("jsonwebtoken");
 const { Token } = require("../models");
 const { tokenTypes } = require("../types/tokens");
+
 // Generate token
 const generateToken = (userId, expires, type) => {
-  const fastify = require("../index");
-
   const payload = {
     userId,
     iat: moment().unix(),
@@ -12,7 +12,7 @@ const generateToken = (userId, expires, type) => {
     type,
   };
 
-  return fastify.jwt.sign(payload);
+  return jwt.sign(payload, process.env.JWT_SECRET);
 };
 
 // Save a token

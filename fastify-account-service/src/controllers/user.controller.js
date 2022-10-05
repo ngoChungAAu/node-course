@@ -3,26 +3,18 @@ const { userService, tokenService } = require("../services");
 const pick = require("../utils/pick");
 
 const register = async (req, rep) => {
-  try {
-    const user = await userService.register(req.body);
+  const user = await userService.register(req.body);
 
-    await tokenService.generateActiveAccountToken(user._id);
+  await tokenService.generateActiveAccountToken(user._id);
 
-    rep.code(httpStatus.CREATED).send(user);
-  } catch (error) {
-    rep.code(httpStatus.SERVICE_UNAVAILABLE).send(error);
-  }
+  rep.code(httpStatus.CREATED).send(user);
 };
 
 const login = async (req, rep) => {
-  try {
-    const { email, password } = req.body;
-    const user = await userService.login(email, password);
-    const tokenObj = await tokenService.generateAuthTokens(user);
-    rep.code(httpStatus.CREATED).send(tokenObj);
-  } catch (error) {
-    rep.code(httpStatus.SERVICE_UNAVAILABLE).send(error);
-  }
+  const { email, password } = req.body;
+  const user = await userService.login(email, password);
+  const tokenObj = await tokenService.generateAuthTokens(user);
+  rep.code(httpStatus.CREATED).send(tokenObj);
 };
 
 const getProfile = async (req, rep) => {

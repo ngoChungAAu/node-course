@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 const { User } = require("../models");
 
-module.exports = async () => {
+module.exports = async (fastify, opts) => {
   try {
     await mongoose.connect(process.env.MONGODB_URL, {});
 
-    console.log("Connected to MongoDB");
+    fastify.log.info("Connected to MongoDB");
 
     const count = await User.countDocuments({ email: "admin@au.com" });
 
@@ -20,7 +20,7 @@ module.exports = async () => {
 
       await admin.save();
 
-      console.log("Set default admin success");
+      fastify.log.info("Set default admin success");
     }
   } catch (error) {
     console.log(error.message);

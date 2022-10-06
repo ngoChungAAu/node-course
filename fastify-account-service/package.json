@@ -25,6 +25,7 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.4",
     "mongoose": "^6.6.2",
+    "nodemailer": "^6.8.0",
     "pino": "^8.6.1",
     "pino-pretty": "^9.1.0"
   }

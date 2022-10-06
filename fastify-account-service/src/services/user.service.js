@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
-const User = require("../models/user.model");
 const ApiError = require("../utils/ApiError");
-const fs = require("fs");
+const { User, Token } = require("../models");
+const jwt = require("jsonwebtoken");
 
 const register = async (userBody) => {
   const isTaken = await User.isEmailTaken(userBody.email);
@@ -134,12 +134,10 @@ const activeAccount = async (token) => {
   });
 
   if (!tokenDoc) {
-    return next(
-      new ApiError(httpStatus.UNAUTHORIZED, "Token not found. Please register!")
-    );
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Token not found!");
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, res) => {
+  await jwt.verify(token, async (err, res) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
         await tokenDoc.remove();

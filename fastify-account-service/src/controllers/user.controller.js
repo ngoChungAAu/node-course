@@ -1,11 +1,13 @@
 const httpStatus = require("http-status");
-const { userService, tokenService } = require("../services");
+const { userService, tokenService, mailService } = require("../services");
 const pick = require("../utils/pick");
 
 const register = async (req, rep) => {
   const user = await userService.register(req.body);
 
-  await tokenService.generateActiveAccountToken(user._id);
+  const token = await tokenService.generateActiveAccountToken(user._id);
+
+  await mailService.sendActiveAccountEmail(req.body.email, token);
 
   rep.code(httpStatus.CREATED).send(user);
 };
@@ -69,7 +71,11 @@ const activeAccount = async (req, rep) => {
 };
 
 const uploadAvatar = async (req, rep) => {
-  req.user.avatar = req.file.buffer;
+  const base64IMG = req.file.buffer.toString("base64");
+
+  const data = `data:${req.file.mimetype};base64,${base64IMG}`;
+
+  req.user.avatar = data;
 
   await req.user.save();
 

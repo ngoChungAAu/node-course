@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const toJSON = require("../utils/toJSON");
 const { roleTypes } = require("../types/roles");
+const { string } = require("joi");
 
 const schema = mongoose.Schema(
   {
@@ -36,7 +37,7 @@ const schema = mongoose.Schema(
       },
       private: true,
     },
-    avatar: { type: Buffer },
+    avatar: { type: String, default: "" },
     name: { type: String, require: true },
     age: {
       type: Number,

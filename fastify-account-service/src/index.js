@@ -43,3 +43,5 @@ fastify.listen(
     }
   }
 );
+
+module.exports = fastify;

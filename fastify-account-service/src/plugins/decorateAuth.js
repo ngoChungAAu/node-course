@@ -21,12 +21,12 @@ module.exports = fp((fastify, opts, done) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
           await tokenDoc.remove();
-
-          throw new ApiError(
-            httpStatus.UNAUTHORIZED,
-            "Token is expired!. Please login again!"
-          );
         }
+
+        throw new ApiError(
+          httpStatus.UNAUTHORIZED,
+          "Token is expired!. Please login again!"
+        );
       }
     });
 

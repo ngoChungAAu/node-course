@@ -84,10 +84,10 @@ module.exports = async (fastify, opts) => {
   );
 
   // active account
-  fastify.post("/active-account", userController.activeAccount);
+  fastify.post("/active-account", {}, userController.activeAccount);
 
   // upload avatar
-  fastify.post(
+  fastify.patch(
     "/upload-avatar",
     {
       onRequest: fastify.auth(),

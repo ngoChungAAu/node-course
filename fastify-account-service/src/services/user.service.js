@@ -137,7 +137,7 @@ const activeAccount = async (token) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Token not found!");
   }
 
-  await jwt.verify(token, async (err, res) => {
+  await jwt.verify(token, process.env.JWT_SECRET, async (err, res) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
         await tokenDoc.remove();

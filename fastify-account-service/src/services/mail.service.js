@@ -19,7 +19,7 @@ If you did not request any password resets, then ignore this email.`;
 // Send active user
 const sendActiveAccountEmail = async (to, token) => {
   const subject = "Active your account";
-  const activeAccountUrl = `localhost:3000/active-account?token=${token}`;
+  const activeAccountUrl = `localhost:3000/api/user/active-account?token=${token}`;
   const text = `Dear user,
 To verify your email, click on this link: ${activeAccountUrl}
 If you did not create an account, then ignore this email.`;

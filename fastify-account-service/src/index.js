@@ -8,7 +8,11 @@ const fastify = require("fastify")(logger);
 
 require("dotenv").config();
 
+// connect to mongoose
 fastify.register(require("./databases/mongoose"));
+
+// create mailer transporter
+fastify.register(require("./config/transporter"));
 
 // load all plugins
 fastify.register(autoLoad, {
@@ -43,5 +47,3 @@ fastify.listen(
     }
   }
 );
-
-module.exports = fastify;

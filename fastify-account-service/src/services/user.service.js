@@ -31,6 +31,10 @@ const login = async (email, password) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
   }
 
+  if (!user.isActive) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Account not active");
+  }
+
   return user;
 };
 

@@ -3,9 +3,9 @@ module.exports.logger = {
     target: "pino-pretty",
     options: {
       colorize: true,
-      translateTime: "mm/dd/yyyy HH:MM:ss",
-      ignore: "pid,hostname,reqId,responseTime,req,res",
-      messageFormat: "{msg} [{req.method} {req.url} {res.statusCode}]",
+      singleLine: true,
+      translateTime: "SYS:dd-mm-yy HH:MM:ss",
+      ignore: "pid,req.hostname,req.remoteAddress,req.remotePort,responseTime",
     },
   },
 };

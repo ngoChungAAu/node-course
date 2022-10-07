@@ -1,5 +1,5 @@
 const fp = require("fastify-plugin");
 
 module.exports = fp(async (fastify, opts) => {
-  // fastify.register(require("@fastify/multipart"));
+  fastify.register(require("@fastify/cors"), {});
 });
